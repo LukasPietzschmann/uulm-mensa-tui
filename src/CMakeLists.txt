@@ -19,6 +19,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(curlpp gzip json)
 
-add_executable(tui main.cpp)
+add_executable(tui main.cpp list_view.cpp)
 target_link_libraries(tui ${CURSES_LIBRARIES} curlpp z nlohmann_json::nlohmann_json)
 target_include_directories(tui PUBLIC ${CURSES_INCLUDE_DIR} ${curlpp_SOURCE_DIR}/include ${gzip_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
