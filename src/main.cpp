@@ -19,6 +19,8 @@
 using namespace nlohmann;
 
 struct Date : public Showable {
+	Date(int year, int month, int day) : year(year), month(month), day(day) {}
+
 	int year;
 	int month;
 	int day;
@@ -31,11 +33,11 @@ struct Date : public Showable {
 };
 
 struct Meal {
-	Meal(const std::string& category, const std::string& name, const std::string& price) :
+	Meal(const std::string& category, const std::string& name, float price) :
 		category(category), name(name), price(price) {}
 	std::string category;
 	std::string name;
-	std::string price;
+	float price;
 };
 
 struct ListElement : public Showable {
@@ -87,13 +89,14 @@ int main() {
 	setup_colors();
 	setup_windows();
 
-	for(const auto& el : api_response.at("ul_uni_sued").items()) {
-		const Date& date = parse_date(el.key());
+	for(const auto& element : api_response.at("ul_uni_sued").items()) {
+		const Date& date = parse_date(element.key());
 		std::vector<Meal> meals;
 		meals.reserve(4);
-		for(const auto& meal : el.value().items()) {
-			const auto& value = meal.value();
-			meals.emplace_back(value.at("category").get<std::string>(), value.at("name").get<std::string>(), "0");
+		for(const auto& meal : element.value().items()) {
+			const auto& meal_value = meal.value();
+			meals.emplace_back(meal_value.at("category").get<std::string>(), meal_value.at("name").get<std::string>(),
+				stof(meal_value.at("prices").at("students").get<std::string>()));
 		}
 
 		date_list->emplace_back(date, meals);
