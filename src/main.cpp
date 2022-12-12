@@ -18,21 +18,38 @@
 
 using namespace nlohmann;
 
-struct Date {
+struct Date : public Showable {
 	int year;
 	int month;
 	int day;
 
-	std::string as_string() const {
+	std::string as_string() const override {
 		std::stringstream ss;
 		ss << day << '.' << month << '.' << year;
 		return ss.str();
 	}
 };
 
+struct Meal {
+	Meal(const std::string& category, const std::string& name, const std::string& price) :
+		category(category), name(name), price(price) {}
+	std::string category;
+	std::string name;
+	std::string price;
+};
+
+struct ListElement : public Showable {
+	ListElement(const Date& date, const std::vector<Meal> meals) : date(date), meals(meals) {}
+
+	Date date;
+	std::vector<Meal> meals;
+
+	std::string as_string() const override { return date.as_string(); }
+};
+
 WINDOW* main_viewport;
 WINDOW* footer;
-ListView* date_list;
+ListView<ListElement>* date_list;
 
 unsigned width;
 unsigned height;
@@ -72,7 +89,14 @@ int main() {
 
 	for(const auto& el : api_response.at("ul_uni_sued").items()) {
 		const Date& date = parse_date(el.key());
-		date_list->push_back(date.as_string());
+		std::vector<Meal> meals;
+		meals.reserve(4);
+		for(const auto& meal : el.value().items()) {
+			const auto& value = meal.value();
+			meals.emplace_back(value.at("category").get<std::string>(), value.at("name").get<std::string>(), "0");
+		}
+
+		date_list->emplace_back(date, meals);
 	}
 	date_list->select_elem(0);
 	date_list->prepare_refresh();
@@ -83,8 +107,9 @@ int main() {
 		if(c == 'q')
 			break;
 		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN) {
-			had_error =
-				!date_list->select_elem(1, c == KEY_ARROW_UP ? ListView::DECREMENT : ListView::INCREMENT) || had_error;
+			ListView<ListElement>::SelectAction action =
+				c == KEY_ARROW_UP ? ListView<ListElement>::DECREMENT : ListView<ListElement>::INCREMENT;
+			had_error = !date_list->select_elem(1, action) || had_error;
 			date_list->prepare_refresh();
 		} else {
 			wmove(main_viewport, 0, 0);
@@ -143,7 +168,7 @@ void setup_windows() {
 	wbkgd(main_viewport, COLOR_PAIR(STD_COLOR_PAIR));
 	wnoutrefresh(main_viewport);
 
-	date_list = new ListView(DATE_LIST_WIDTH, height - FOOTER_HEIGHT, 0, 0);
+	date_list = new ListView<ListElement>(DATE_LIST_WIDTH, height - FOOTER_HEIGHT, 0, 0);
 	wbkgd(**date_list, COLOR_PAIR(STD_COLOR_PAIR));
 	date_list->prepare_refresh();
 
