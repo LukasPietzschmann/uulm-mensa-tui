@@ -4,11 +4,11 @@
 
 #include <string>
 
-class window_like {
+class WindowLike {
 public:
-	window_like(WINDOW* base, unsigned screen_width, unsigned screen_height, unsigned x, unsigned y) :
+	WindowLike(WINDOW* base, unsigned screen_width, unsigned screen_height, unsigned x, unsigned y) :
 		m_underlying_window(base), m_screen_width(screen_width), m_screen_height(screen_height), m_x(x), m_y(y) {}
-	virtual ~window_like() = default;
+	virtual ~WindowLike() = default;
 
 	virtual void add_str(const std::string& s, unsigned x, unsigned y) = 0;
 	virtual void clear() = 0;

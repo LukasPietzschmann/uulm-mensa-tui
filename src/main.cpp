@@ -13,8 +13,8 @@
 #include <string>
 #include <string_view>
 
+#include "ListView.hpp"
 #include "constants.hpp"
-#include "list_view.hpp"
 
 using namespace nlohmann;
 
@@ -32,7 +32,7 @@ struct Date {
 
 WINDOW* main_viewport;
 WINDOW* footer;
-list_view* date_list;
+ListView* date_list;
 
 unsigned width;
 unsigned height;
@@ -83,8 +83,8 @@ int main() {
 		if(c == 'q')
 			break;
 		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN) {
-			had_error = !date_list->select_elem(1, c == KEY_ARROW_UP ? list_view::DECREMENT : list_view::INCREMENT) ||
-				had_error;
+			had_error =
+				!date_list->select_elem(1, c == KEY_ARROW_UP ? ListView::DECREMENT : ListView::INCREMENT) || had_error;
 			date_list->prepare_refresh();
 		} else {
 			wmove(main_viewport, 0, 0);
@@ -143,7 +143,7 @@ void setup_windows() {
 	wbkgd(main_viewport, COLOR_PAIR(STD_COLOR_PAIR));
 	wnoutrefresh(main_viewport);
 
-	date_list = new list_view(DATE_LIST_WIDTH, height - FOOTER_HEIGHT, 0, 0);
+	date_list = new ListView(DATE_LIST_WIDTH, height - FOOTER_HEIGHT, 0, 0);
 	wbkgd(**date_list, COLOR_PAIR(STD_COLOR_PAIR));
 	date_list->prepare_refresh();
 

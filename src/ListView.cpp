@@ -1,14 +1,14 @@
-#include "list_view.hpp"
+#include "ListView.hpp"
 
 #include "constants.hpp"
 
-void list_view::add_str(const std::string& s, unsigned x, unsigned y) {
+void ListView::add_str(const std::string& s, unsigned x, unsigned y) {
 	mvwaddnstr(m_underlying_window, y, x, s.c_str(), s.size());
 }
 
-void list_view::clear() { werase(m_underlying_window); }
+void ListView::clear() { werase(m_underlying_window); }
 
-void list_view::prepare_refresh() {
+void ListView::prepare_refresh() {
 	clear();
 	for(unsigned i = 0; i < size(); ++i) {
 		if(m_selected.has_value() && m_selected.value() == i)
@@ -20,7 +20,7 @@ void list_view::prepare_refresh() {
 	wnoutrefresh(m_underlying_window);
 }
 
-bool list_view::select_elem(unsigned index, SelectAction action) {
+bool ListView::select_elem(unsigned index, SelectAction action) {
 	if(action == INCREMENT)
 		index = m_selected.value_or(0) + index;
 	else if(action == DECREMENT)
@@ -33,11 +33,11 @@ bool list_view::select_elem(unsigned index, SelectAction action) {
 	return true;
 }
 
-void list_view::unselect_elem() { m_selected.reset(); }
+void ListView::unselect_elem() { m_selected.reset(); }
 
-std::optional<unsigned> list_view::get_selected_index() const { return m_selected; }
+std::optional<unsigned> ListView::get_selected_index() const { return m_selected; }
 
-std::optional<std::string> list_view::get_selected_element() const {
+std::optional<std::string> ListView::get_selected_element() const {
 	if(!m_selected.has_value())
 		return {};
 	return at(m_selected.value());

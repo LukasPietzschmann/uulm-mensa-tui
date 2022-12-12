@@ -2,8 +2,8 @@
 
 #include <ncurses.h>
 
-#include "list_view.hpp"
+#include "ListView.hpp"
 
 extern WINDOW* main_viewport;
 extern WINDOW* footer;
-extern list_view* date_list;
+extern ListView* date_list;
