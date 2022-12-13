@@ -17,7 +17,6 @@ public:
 	using std::vector<T>::push_back;
 	using std::vector<T>::pop_back;
 
-	enum SelectAction { INCREMENT, DECREMENT, SELECT };
 
 	ListView(unsigned list_width, unsigned list_height, unsigned x, unsigned y) :
 		WindowLike(newwin(list_height, list_width, y, x), list_width, list_height, x, y) {}

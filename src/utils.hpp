@@ -3,6 +3,8 @@
 #include <string>
 #include <type_traits>
 
+enum class SelectAction { INCREMENT, DECREMENT, SELECT };
+
 template <typename T, typename... Args>
 using All = typename std::enable_if_t<std::conjunction_v<std::is_convertible<Args, T>...>>;
 
