@@ -13,45 +13,16 @@
 #include <string>
 #include <string_view>
 
-#include "ListView.hpp"
+#include "DateDetails.hpp"
+#include "ListElement.hpp"
+#include "MasterSlave.hpp"
 #include "constants.hpp"
 
 using namespace nlohmann;
 
-struct Date : public Showable {
-	Date(int year, int month, int day) : year(year), month(month), day(day) {}
-
-	int year;
-	int month;
-	int day;
-
-	std::string as_string() const override {
-		std::stringstream ss;
-		ss << day << '.' << month << '.' << year;
-		return ss.str();
-	}
-};
-
-struct Meal {
-	Meal(const std::string& category, const std::string& name, float price) :
-		category(category), name(name), price(price) {}
-	std::string category;
-	std::string name;
-	float price;
-};
-
-struct ListElement : public Showable {
-	ListElement(const Date& date, const std::vector<Meal> meals) : date(date), meals(meals) {}
-
-	Date date;
-	std::vector<Meal> meals;
-
-	std::string as_string() const override { return date.as_string(); }
-};
-
 WINDOW* main_viewport;
 WINDOW* footer;
-ListView<ListElement>* date_list;
+MasterSlave<ListElement, DateDetails>* ms;
 
 unsigned width;
 unsigned height;
@@ -98,11 +69,9 @@ int main() {
 			meals.emplace_back(meal_value.at("category").get<std::string>(), meal_value.at("name").get<std::string>(),
 				stof(meal_value.at("prices").at("students").get<std::string>()));
 		}
-
-		date_list->emplace_back(date, meals);
+		ms->emplace_back(date, meals);
 	}
-	date_list->select_elem(0);
-	date_list->prepare_refresh();
+	ms->prepare_refresh();
 
 	doupdate();
 	while(int c = wgetch(footer)) {
@@ -110,10 +79,12 @@ int main() {
 		if(c == 'q')
 			break;
 		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN) {
-			ListView<ListElement>::SelectAction action =
-				c == KEY_ARROW_UP ? ListView<ListElement>::DECREMENT : ListView<ListElement>::INCREMENT;
-			had_error = !date_list->select_elem(1, action) || had_error;
-			date_list->prepare_refresh();
+			SelectAction action = c == KEY_ARROW_UP ? SelectAction::DECREMENT : SelectAction::INCREMENT;
+			had_error = !ms->select_elem(1, action) || had_error;
+			ms->prepare_refresh();
+		} else if(c == KEY_ESCAPE) {
+			ms->unselect_elem();
+			ms->prepare_refresh();
 		} else {
 			wmove(main_viewport, 0, 0);
 			wprintw(main_viewport, "%c", c);
@@ -171,9 +142,8 @@ void setup_windows() {
 	wbkgd(main_viewport, COLOR_PAIR(STD_COLOR_PAIR));
 	wnoutrefresh(main_viewport);
 
-	date_list = new ListView<ListElement>(DATE_LIST_WIDTH, height - FOOTER_HEIGHT, 0, 0);
-	wbkgd(**date_list, COLOR_PAIR(STD_COLOR_PAIR));
-	date_list->prepare_refresh();
+	ms = new MasterSlave<ListElement, DateDetails>(width, height - FOOTER_HEIGHT, 0, 0);
+	ms->prepare_refresh();
 
 	footer = newwin(FOOTER_HEIGHT, width, height - FOOTER_HEIGHT, 0);
 	wbkgd(footer, COLOR_PAIR(FOOTER_COLOR_PAIR));

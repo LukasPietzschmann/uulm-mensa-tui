@@ -11,6 +11,9 @@ using All = typename std::enable_if_t<std::conjunction_v<std::is_convertible<Arg
 template <typename T, typename B>
 using InstanceOf = typename std::enable_if_t<std::is_base_of_v<B, T>>;
 
+template <typename T, typename... Args>
+using ConstructableWith = typename std::enable_if_t<std::is_constructible_v<T, Args...>>;
+
 struct Showable {
 	virtual ~Showable() = default;
 	virtual std::string as_string() const = 0;

@@ -11,3 +11,4 @@
 
 #define KEY_ARROW_UP KEY_UP
 #define KEY_ARROW_DOWN KEY_DOWN
+#define KEY_ESCAPE 27

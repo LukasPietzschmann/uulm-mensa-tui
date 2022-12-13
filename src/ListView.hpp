@@ -14,13 +14,9 @@ template <typename T, typename = InstanceOf<T, Showable>>
 class ListView : public WindowLike, private std::vector<T> {
 public:
 	using std::vector<T>::emplace_back;
-	using std::vector<T>::push_back;
-	using std::vector<T>::pop_back;
 
-
-	ListView(unsigned list_width, unsigned list_height, unsigned x, unsigned y) :
-		WindowLike(newwin(list_height, list_width, y, x), list_width, list_height, x, y) {}
-
+	ListView(unsigned list_width, unsigned list_height, unsigned x, unsigned y, WINDOW* w = nullptr) :
+		WindowLike(w ? w : newwin(list_height, list_width, y, x), list_width, list_height, x, y) {}
 
 	void prepare_refresh() override {
 		werase(m_underlying_window);
