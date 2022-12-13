@@ -12,5 +12,5 @@ public:
 	void show(const ListElement& element) override;
 
 private:
-	void render_meal(const Meal& meal, unsigned max_width, unsigned x, unsigned y);
+	void render_meal(const Meal& meal, unsigned x, unsigned y);
 };
