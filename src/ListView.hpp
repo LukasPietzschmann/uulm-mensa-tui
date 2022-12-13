@@ -22,18 +22,14 @@ public:
 	ListView(unsigned list_width, unsigned list_height, unsigned x, unsigned y) :
 		WindowLike(newwin(list_height, list_width, y, x), list_width, list_height, x, y) {}
 
-	void add_str(const std::string& s, unsigned x, unsigned y) override {
-		mvwaddnstr(m_underlying_window, y, x, s.c_str(), s.size());
-	}
-
-	void clear() override { werase(m_underlying_window); }
 
 	void prepare_refresh() override {
-		clear();
+		werase(m_underlying_window);
 		for(unsigned i = 0; i < this->size(); ++i) {
 			if(m_selected.has_value() && m_selected.value() == i)
 				wattron(m_underlying_window, A_HIGHLIGHT);
-			add_str(this->at(i).as_string(), 0, i);
+			const std::string& s = this->at(i).as_string();
+			mvwaddnstr(m_underlying_window, i, 0, s.c_str(), s.size());
 			if(m_selected.has_value() && m_selected.value() == i)
 				wattroff(m_underlying_window, A_HIGHLIGHT);
 		}
