@@ -1,21 +1,16 @@
 #pragma once
 
-#include <sstream>
+#include <ncurses.h>
 
 #include "CanShowDetailsOf.hpp"
 #include "ListElement.hpp"
 
 class DateDetails : public CanShowDetailsOf<ListElement> {
 public:
-	DateDetails(unsigned width, unsigned height, unsigned x, unsigned y, WINDOW* w = nullptr) :
-		CanShowDetailsOf<ListElement>(w ? w : newwin(height, width, y, x), width, height, x, y) {}
+	DateDetails(unsigned width, unsigned height, unsigned x, unsigned y, WINDOW* w = nullptr);
 
-	void show(const ListElement& element) override {
-		std::stringstream ss;
-		for(const Meal& meal : element.meals)
-			ss << meal.name << "\n\n";
-		const auto& s = ss.str();
+	void show(const ListElement& element) override;
 
-		mvwaddnstr(m_underlying_window, 0, 0, s.c_str(), s.size());
-	}
+private:
+	void render_meal(const Meal& meal, unsigned max_width, unsigned x, unsigned y);
 };
