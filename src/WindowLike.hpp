@@ -11,6 +11,10 @@ public:
 	virtual ~WindowLike() = default;
 
 	virtual void prepare_refresh() { wnoutrefresh(m_underlying_window); }
+	virtual void clear() {
+		werase(m_underlying_window);
+		clearok(m_underlying_window, true);
+	}
 
 	unsigned get_height() const { return m_screen_height; }
 	unsigned get_width() const { return m_screen_width; }

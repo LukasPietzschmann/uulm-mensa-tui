@@ -25,13 +25,11 @@ public:
 
 	void prepare_refresh() override {
 		m_master->prepare_refresh();
-		if(const auto& element = m_master->get_selected_element(); element.has_value()) {
+		if(const auto& element = m_master->get_selected_element(); element.has_value())
 			m_slave->show(element.value());
-			m_slave->prepare_refresh();
-		} else {
-			werase(**m_slave);
-			wnoutrefresh(**m_slave);
-		}
+		else
+			m_slave->clear();
+		m_slave->prepare_refresh();
 	}
 
 	template <typename... Args, typename = ConstructableWith<L, Args...>>

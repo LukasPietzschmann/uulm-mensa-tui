@@ -19,7 +19,7 @@ public:
 		WindowLike(w ? w : newwin(list_height, list_width, y, x), list_width, list_height, x, y) {}
 
 	void prepare_refresh() override {
-		werase(m_underlying_window);
+		clear();
 		for(unsigned i = 0; i < this->size(); ++i) {
 			if(m_selected.has_value() && m_selected.value() == i)
 				wattron(m_underlying_window, A_HIGHLIGHT);
