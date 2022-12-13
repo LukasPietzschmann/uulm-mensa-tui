@@ -36,11 +36,13 @@ public:
 		wnoutrefresh(m_underlying_window);
 	}
 
-	bool select_elem(unsigned index, SelectAction action = SELECT) {
-		if(action == INCREMENT)
-			index = m_selected.value_or(0) + index;
-		else if(action == DECREMENT)
-			index = m_selected.value_or(this->size() - 1) - index;
+	bool select_elem(unsigned index, SelectAction action = SelectAction::SELECT) {
+		if(action == SelectAction::INCREMENT)
+			// Although value_or returns an unsigned, -1 will behave correctly in this case,
+			// as adding some value to it, will wrap around and end up at the added value
+			index = m_selected.value_or(-1) + index;
+		else if(action == SelectAction::DECREMENT)
+			index = m_selected.value_or(this->size()) - index;
 
 		if(index >= this->size())
 			return false;
