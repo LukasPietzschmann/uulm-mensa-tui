@@ -19,16 +19,37 @@ void DateDetails::render_meal(const Meal& meal, unsigned x, unsigned y) {
 	unsigned height = 1 + 1 + 1;
 	std::array<std::string, 3> elements = {meal.category, meal.name, meal.price};
 
-	for(unsigned i = 0; i < width + 2; ++i) {
-		mvwaddch(m_underlying_window, y, x + i, '_');
-		mvwaddch(m_underlying_window, y + height + 1, x + i, '-');
-	}
+	box_area_inside(x, y, x + width, y + height);
 
 	for(unsigned i = 0; i < elements.size(); ++i) {
-		mvwaddch(m_underlying_window, y + i + 1, x, '|');
-		mvwaddch(m_underlying_window, y + i + 1, x + width + 2, '|');
-
 		const std::string elem = replace_sub(elements.at(i), "ß", "ss");
 		mvwaddnstr(m_underlying_window, y + i + 1, x + 1, elem.c_str(), elem.size());
 	}
+}
+
+void DateDetails::box_area_inside(unsigned x1, unsigned y1, unsigned x2, unsigned y2) {
+	unsigned width = x2 - x1;
+	unsigned height = y2 - y1;
+
+	// Horizontal lines
+	wmove(m_underlying_window, y1, x1 + 1);
+	whline(m_underlying_window, ACS_HLINE, width);
+	wmove(m_underlying_window, y2 + 1, x1 + 1);
+	whline(m_underlying_window, ACS_HLINE, width);
+
+	// Vertical lines
+	wmove(m_underlying_window, y1 + 1, x1);
+	wvline(m_underlying_window, ACS_VLINE, height);
+	wmove(m_underlying_window, y1 + 1, x2 + 1);
+	wvline(m_underlying_window, ACS_VLINE, height);
+
+	// Corners
+	wmove(m_underlying_window, y1, x1);
+	waddch(m_underlying_window, ACS_ULCORNER);
+	wmove(m_underlying_window, y1, x2 + 1);
+	waddch(m_underlying_window, ACS_URCORNER);
+	wmove(m_underlying_window, y2 + 1, x1);
+	waddch(m_underlying_window, ACS_LLCORNER);
+	wmove(m_underlying_window, y2 + 1, x2 + 1);
+	waddch(m_underlying_window, ACS_LRCORNER);
 }

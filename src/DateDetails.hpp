@@ -13,4 +13,5 @@ public:
 
 private:
 	void render_meal(const Meal& meal, unsigned x, unsigned y);
+	void box_area_inside(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 };
