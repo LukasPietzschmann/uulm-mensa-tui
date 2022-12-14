@@ -85,10 +85,6 @@ int main() {
 		} else if(c == KEY_ESCAPE) {
 			ms->unselect_elem();
 			ms->prepare_refresh();
-		} else {
-			wmove(main_viewport, 0, 0);
-			wprintw(main_viewport, "%c", c);
-			wnoutrefresh(main_viewport);
 		}
 
 		if(had_error) {
