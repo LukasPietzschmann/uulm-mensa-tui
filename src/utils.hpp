@@ -4,6 +4,7 @@
 #include <regex>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 enum class SelectAction { INCREMENT, DECREMENT, SELECT };
 
@@ -36,8 +37,17 @@ inline const T& min(const T& t1, const T& t2, const Args&... args) {
 	return std::min(t1, min(t2, args...));
 }
 
-inline std::string replace_sub(const std::string& orig, const std::string& sub, const std::string& repl) {
-	return std::regex_replace(orig, std::regex(sub), repl);
+inline std::pair<std::string, std::string> rp(const std::string& sub, const std::string& repl) {
+	return std::make_pair(sub, repl);
+}
+
+inline std::string replace_sub(const std::string& orig, std::pair<std::string, std::string> p) {
+	return std::regex_replace(orig, std::regex(p.first), p.second);
+}
+
+template <typename... Args, typename = All<std::pair<std::string, std::string>, Args...>>
+inline std::string replace_sub(const std::string& orig, std::pair<std::string, std::string> p, Args... args) {
+	return std::regex_replace(replace_sub(orig, args...), std::regex(p.first), p.second);
 }
 
 struct Showable {

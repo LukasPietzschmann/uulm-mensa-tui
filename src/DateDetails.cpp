@@ -22,7 +22,8 @@ void DateDetails::render_meal(const Meal& meal, unsigned x, unsigned y) {
 	box_area_inside(x, y, x + width, y + height);
 
 	for(unsigned i = 0; i < elements.size(); ++i) {
-		const std::string elem = replace_sub(elements.at(i), "ß", "ss");
+		const std::string elem =
+			replace_sub(elements.at(i), rp("ß", "ss"), rp("ä", "ae"), rp("ö", "oe"), rp("ü", "ue"), rp("€", "Euro"));
 		mvwaddnstr(m_underlying_window, y + i + 1, x + 1, elem.c_str(), elem.size());
 	}
 }
