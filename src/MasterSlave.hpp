@@ -14,7 +14,7 @@ class MasterSlave : public WindowLike {
 public:
 	MasterSlave(unsigned width, unsigned height, unsigned x, unsigned y) : WindowLike(nullptr, width, height, x, y) {
 		unsigned master_width = floor(width * 0.1);
-		m_master = new ListView<L>(master_width, height, x, y);
+		m_master = new ListView<L>(ListView<L>::VERTICAL, master_width, height, x, y);
 		m_slave = new D(width - master_width, height, x + master_width, y);
 	}
 
