@@ -20,9 +20,8 @@
 
 using namespace nlohmann;
 
-WINDOW* main_viewport;
-WINDOW* footer;
 MasterSlave<ListElement, DateDetails>* ms;
+WINDOW* footer;
 
 unsigned width;
 unsigned height;
@@ -95,9 +94,6 @@ int main() {
 		doupdate();
 	}
 
-	delwin(footer);
-	endwin();
-
 	handle_signal(0);
 }
 
@@ -117,8 +113,8 @@ Date parse_date(const std::string& date_string) {
 }
 
 void handle_signal(int sig) {
+	delete ms;
 	delwin(footer);
-	delwin(main_viewport);
 	endwin();
 	exit(sig);
 }
@@ -134,10 +130,6 @@ void setup_colors() {
 void setup_windows() {
 	wresize(stdscr, 0, 0);
 	wnoutrefresh(stdscr);
-
-	main_viewport = newwin(height - FOOTER_HEIGHT, width - DATE_LIST_WIDTH, 0, DATE_LIST_WIDTH);
-	wbkgd(main_viewport, COLOR_PAIR(STD_COLOR_PAIR));
-	wnoutrefresh(main_viewport);
 
 	ms = new MasterSlave<ListElement, DateDetails>(width, height - FOOTER_HEIGHT, 0, 0);
 	ms->set_bg(STD_COLOR_PAIR);

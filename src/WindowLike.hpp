@@ -8,7 +8,7 @@ class WindowLike {
 public:
 	WindowLike(WINDOW* base, unsigned screen_width, unsigned screen_height, unsigned x, unsigned y) :
 		m_underlying_window(base), m_screen_width(screen_width), m_screen_height(screen_height), m_x(x), m_y(y) {}
-	virtual ~WindowLike() = default;
+	virtual ~WindowLike() { delwin(m_underlying_window); }
 
 	virtual void prepare_refresh() { wnoutrefresh(m_underlying_window); }
 	virtual void clear() {
