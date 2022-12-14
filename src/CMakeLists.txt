@@ -1,5 +1,8 @@
 include(FetchContent)
 
+set(CURSES_NEED_NCURSES TRUE)
+set(CURSES_NEED_WIDE TRUE)
+include(FindCurses)
 find_package(Curses REQUIRED)
 FetchContent_Declare(
 		curlpp
