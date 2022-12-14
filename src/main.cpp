@@ -17,6 +17,7 @@
 #include "ListElement.hpp"
 #include "MasterSlave.hpp"
 #include "constants.hpp"
+#include "utils.hpp"
 
 using namespace nlohmann;
 
@@ -137,6 +138,9 @@ void setup_windows() {
 
 	footer = newwin(FOOTER_HEIGHT, width, height - FOOTER_HEIGHT, 0);
 	wbkgd(footer, COLOR_PAIR(FOOTER_COLOR_PAIR));
+	const std::string& string = pad_center_string_to_width("Arrow up/down: Select date", width);
+	mvwaddnstr(footer, 0, 0, string.c_str(), string.size());
+
 	keypad(footer, true);
 	wnoutrefresh(footer);
 }

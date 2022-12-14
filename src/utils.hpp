@@ -50,6 +50,13 @@ inline std::string replace_sub(const std::string& orig, std::pair<std::string, s
 	return std::regex_replace(replace_sub(orig, args...), std::regex(p.first), p.second);
 }
 
+inline std::string pad_center_string_to_width(const std::string& string, unsigned width) {
+	unsigned padding = (width / 2) - (string.size() / 2);
+	std::string result(padding, ' ');
+	result.append(string);
+	return result;
+}
+
 struct Showable {
 	virtual ~Showable() = default;
 	virtual std::string as_string() const = 0;
