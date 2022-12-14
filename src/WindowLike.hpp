@@ -16,6 +16,8 @@ public:
 		clearok(m_underlying_window, true);
 	}
 
+	virtual void set_bg(int color) { wbkgd(m_underlying_window, COLOR_PAIR(color)); }
+
 	unsigned get_height() const { return m_screen_height; }
 	unsigned get_width() const { return m_screen_width; }
 

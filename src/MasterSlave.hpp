@@ -32,6 +32,11 @@ public:
 		m_slave->prepare_refresh();
 	}
 
+	void set_bg(int bg) override {
+		m_master->set_bg(bg);
+		m_slave->set_bg(bg);
+	}
+
 	template <typename... Args, typename = ConstructableWith<L, Args...>>
 	void emplace_back(Args&&... args) {
 		m_master->emplace_back(std::forward<Args>(args)...);

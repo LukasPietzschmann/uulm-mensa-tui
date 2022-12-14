@@ -129,9 +129,10 @@ void handle_signal(int sig) {
 
 void setup_colors() {
 	start_color();
-	init_pair(STD_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
-	init_pair(FOOTER_COLOR_PAIR, COLOR_BLACK, COLOR_RED);
-	init_pair(HIGHLIGHT_EXPR_COLOR_PAR, COLOR_RED, COLOR_BLACK);
+	init_color(COLOR_REAL_BLACK, 0, 0, 0);
+	init_pair(STD_COLOR_PAIR, COLOR_WHITE, COLOR_REAL_BLACK);
+	init_pair(FOOTER_COLOR_PAIR, COLOR_REAL_BLACK, COLOR_RED);
+	init_pair(HIGHLIGHT_EXPR_COLOR_PAR, COLOR_RED, COLOR_REAL_BLACK);
 }
 
 void setup_windows() {
@@ -143,6 +144,7 @@ void setup_windows() {
 	wnoutrefresh(main_viewport);
 
 	ms = new MasterSlave<ListElement, DateDetails>(width, height - FOOTER_HEIGHT, 0, 0);
+	ms->set_bg(STD_COLOR_PAIR);
 	ms->prepare_refresh();
 
 	footer = newwin(FOOTER_HEIGHT, width, height - FOOTER_HEIGHT, 0);
