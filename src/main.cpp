@@ -67,7 +67,7 @@ int main() {
 		for(const auto& meal : element.value().items()) {
 			const auto& meal_value = meal.value();
 			meals.emplace_back(meal_value.at("category").get<std::string>(), meal_value.at("name").get<std::string>(),
-				stof(meal_value.at("prices").at("students").get<std::string>()));
+				meal_value.at("prices").at("students").get<std::string>());
 		}
 		ms->emplace_back(date, meals);
 	}

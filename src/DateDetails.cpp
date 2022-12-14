@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <array>
-#include <sstream>
 
 #include "utils.hpp"
 
@@ -18,7 +17,7 @@ void DateDetails::show(const ListElement& element) {
 void DateDetails::render_meal(const Meal& meal, unsigned x, unsigned y) {
 	unsigned width = min(max(meal.name.size(), meal.category.size()), (size_t)m_screen_width);
 	unsigned height = 1 + 1 + 1;
-	std::array<std::string, 3> elements = {meal.category, meal.name, "Price"};
+	std::array<std::string, 3> elements = {meal.category, meal.name, meal.price};
 
 	for(unsigned i = 0; i < width + 2; ++i) {
 		mvwaddch(m_underlying_window, y, x + i, '_');

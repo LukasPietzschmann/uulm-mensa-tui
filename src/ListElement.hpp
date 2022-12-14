@@ -21,11 +21,11 @@ struct Date : public Showable {
 };
 
 struct Meal {
-	Meal(const std::string& category, const std::string& name, float price) :
+	Meal(const std::string& category, const std::string& name, const std::string& price) :
 		category(category), name(name), price(price) {}
 	std::string category;
 	std::string name;
-	float price;
+	std::string price;
 };
 
 struct ListElement : public Showable {
