@@ -78,6 +78,7 @@ int main() {
 		}
 		ms->emplace_back(date, meals);
 	}
+	ms->select_elem(0, SelectAction::SELECT);
 	ms->prepare_refresh();
 
 	doupdate();
