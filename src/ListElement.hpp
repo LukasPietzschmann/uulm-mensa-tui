@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -14,8 +15,20 @@ struct Date : public Showable {
 	int day;
 
 	std::string as_string() const override {
+		static const time_t now = time(nullptr);
+		static const tm* local_now = localtime(&now);
+		if(local_now->tm_year + 1900 == year && local_now->tm_mon + 1 == month) {
+			if(local_now->tm_mday == day)
+				return "Today";
+			if(local_now->tm_mday + 1 == day)
+				return "Tomorrow";
+		}
+
+		static std::map<unsigned, std::string> month_names = {{1, "Jan."}, {2, "Feb."}, {3, "Mar."}, {4, "Apr."},
+			{5, "May"}, {6, "Jun."}, {7, "Jul."}, {8, "Aug."}, {9, "Sep."}, {10, "Oct."}, {11, "Nov."}, {12, "Dec."}};
+
 		std::stringstream ss;
-		ss << day << '.' << month << '.' << year;
+		ss << day << ". " << month_names.at(month);
 		return ss.str();
 	}
 };

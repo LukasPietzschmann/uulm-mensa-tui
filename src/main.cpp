@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <csignal>
+#include <ctime>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -33,6 +34,8 @@ void handle_signal(int sig);
 void setup_colors();
 void setup_windows();
 
+bool is_date_in_the_past(const Date& date);
+
 int main() {
 	curlpp::Cleanup raii_cleanup;
 	curlpp::Easy req;
@@ -62,6 +65,10 @@ int main() {
 
 	for(const auto& element : api_response.at("ul_uni_sued").items()) {
 		const Date& date = parse_date(element.key());
+
+		if(is_date_in_the_past(date))
+			continue;
+
 		std::vector<Meal> meals;
 		meals.reserve(4);
 		for(const auto& meal : element.value().items()) {
@@ -138,9 +145,22 @@ void setup_windows() {
 
 	footer = newwin(FOOTER_HEIGHT, width, height - FOOTER_HEIGHT, 0);
 	wbkgd(footer, COLOR_PAIR(FOOTER_COLOR_PAIR));
-	const std::string& string = pad_center_string_to_width("Arrow up/down: Select date", width);
+	const std::string& string = pad_center_string_to_width("Arrow up/down: Select date\tq: Quit", width);
 	mvwaddnstr(footer, 0, 0, string.c_str(), string.size());
 
 	keypad(footer, true);
 	wnoutrefresh(footer);
+}
+
+bool is_date_in_the_past(const Date& date) {
+	std::tm futureDate;
+	futureDate.tm_year = date.year - 1900;
+	futureDate.tm_mon = date.month - 1;
+	futureDate.tm_mday = date.day;
+
+	std::mktime(&futureDate);
+	std::time_t t = std::time(nullptr);
+	std::time_t futureTime = std::mktime(&futureDate);
+
+	return t > futureTime;
 }
