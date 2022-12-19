@@ -157,7 +157,9 @@ bool is_date_in_the_past(const Date& date) {
 	std::tm futureDate;
 	futureDate.tm_year = date.year - 1900;
 	futureDate.tm_mon = date.month - 1;
-	futureDate.tm_mday = date.day;
+	// A little bit hacky, but it works
+	// This is needed to show "today"
+	futureDate.tm_mday = date.day + 1;
 
 	std::mktime(&futureDate);
 	std::time_t t = std::time(nullptr);
