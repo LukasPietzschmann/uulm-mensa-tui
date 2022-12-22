@@ -15,9 +15,9 @@ FetchContent_Declare(
 		GIT_TAG 7546b35aba5917154a0e9ae43f804b57d22bb966
 )
 FetchContent_Declare(
-	json
-	GIT_REPOSITORY https://github.com/nlohmann/json.git
-	GIT_TAG bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d
+		json
+		GIT_REPOSITORY https://github.com/nlohmann/json.git
+		GIT_TAG bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d
 )
 
 FetchContent_MakeAvailable(curlpp gzip json)
