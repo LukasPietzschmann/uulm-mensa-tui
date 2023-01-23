@@ -15,6 +15,7 @@ class ListView : public WindowLike, private std::vector<T> {
 public:
 	enum Orientation { HORIZONTAL, VERTICAL };
 	using std::vector<T>::emplace_back;
+	using std::vector<T>::size;
 
 	ListView(Orientation orientation, unsigned list_width, unsigned list_height, unsigned x, unsigned y,
 		WINDOW* w = nullptr) :

@@ -48,6 +48,8 @@ public:
 
 	void unselect_elem() { m_master->unselect_elem(); }
 
+	unsigned size() const { return m_master->size(); }
+
 private:
 	ListView<L>* m_master;
 	D* m_slave;

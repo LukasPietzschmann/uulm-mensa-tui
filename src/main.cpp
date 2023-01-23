@@ -31,6 +31,7 @@ unsigned height;
 std::string get_url_for_date(const Date&);
 Date parse_date(const std::string& date_string);
 void handle_signal(int sig);
+void end_curses_mode();
 void setup_colors();
 void setup_windows();
 
@@ -42,11 +43,17 @@ int main() {
 	std::stringstream result;
 	req.setOpt(cURLpp::Options::WriteStream(&result));
 	req.setOpt<curlpp::options::Url>("https://uulm.anter.dev/api/v1/canteens/ul_uni_sued/all");
-	req.perform();
+	try {
+		req.perform();
+	} catch(const curlpp::LibcurlRuntimeError& e) {
+		std::cerr << "[Network Error] " << e.what() << std::endl;
+		return 1;
+	}
 
 	std::string decompressed_data = gzip::decompress(result.view().data(), result.view().size());
 
 	json api_response = json::parse(decompressed_data);
+	const auto& uni_sued_data = api_response.value("ul_uni_sued", json::array());
 
 	initscr();
 
@@ -63,7 +70,7 @@ int main() {
 	setup_colors();
 	setup_windows();
 
-	for(const auto& element : api_response.at("ul_uni_sued").items()) {
+	for(const auto& element : uni_sued_data.items()) {
 		const Date& date = parse_date(element.key());
 
 		if(is_date_in_the_past(date))
@@ -80,6 +87,12 @@ int main() {
 	}
 	ms->select_elem(0, SelectAction::SELECT);
 	ms->prepare_refresh();
+
+	if(ms->size() == 0) {
+		end_curses_mode();
+		std::cout << "No meals available :(\n" << std::endl;
+		return 0;
+	}
 
 	doupdate();
 	while(int c = wgetch(footer)) {
@@ -122,10 +135,14 @@ Date parse_date(const std::string& date_string) {
 }
 
 void handle_signal(int sig) {
+	end_curses_mode();
+	exit(sig);
+}
+
+void end_curses_mode() {
 	delete ms;
 	delwin(footer);
 	endwin();
-	exit(sig);
 }
 
 void setup_colors() {
