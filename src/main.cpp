@@ -99,8 +99,8 @@ int main() {
 		bool had_error = false;
 		if(c == 'q')
 			break;
-		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN) {
-			SelectAction action = c == KEY_ARROW_UP ? SelectAction::DECREMENT : SelectAction::INCREMENT;
+		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN || c == 'j' || c == 'k') {
+			SelectAction action = c == KEY_ARROW_UP || c == 'k' ? SelectAction::DECREMENT : SelectAction::INCREMENT;
 			had_error = !ms->select_elem(1, action) || had_error;
 			ms->prepare_refresh();
 		} else if(c == KEY_ESCAPE) {
