@@ -6,7 +6,6 @@
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
-#include <gzip/decompress.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <regex>
@@ -50,9 +49,7 @@ int main() {
 		return 1;
 	}
 
-	std::string decompressed_data = gzip::decompress(result.view().data(), result.view().size());
-
-	json api_response = json::parse(decompressed_data);
+	json api_response = json::parse(result.view());
 	const auto& uni_sued_data = api_response.value("ul_uni_sued", json::array());
 
 	initscr();
