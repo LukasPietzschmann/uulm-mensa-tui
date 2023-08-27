@@ -66,10 +66,32 @@ int main() {
 	for(const auto& [_, days] : data)
 		day_views.push_back(Make<DaysView>(days));
 
-	auto container = Container::Vertical(
-		{Container::Horizontal({Renderer([] { return text("Mensa Plan") | bold | borderEmpty | flex; }),
-			 Dropdown(&mensen, &selected_mensa)}),
-			Renderer([] { return separator(); }), Container::Tab(day_views, &selected_mensa)});
+	// clang-format off
+	auto container = Container::Vertical({
+		Container::Horizontal({
+			Renderer([] { return text("") | flex; }),
+			Renderer([] { return text("Mensa Plan") | bold | color(Color::Red) | borderEmpty; }),
+			Renderer([] { return text("") | flex; }),
+			Dropdown(&mensen, &selected_mensa)
+		}),
+		Renderer([] { return separator(); }),
+		Container::Tab(day_views, &selected_mensa),
+		Renderer([] { return separator(); }),
+		Container::Horizontal({
+			Renderer([] { return text("Natigate using ← ↑ → ↓ or the mouse. Press ↵ or click to select. Press q to exit.") | dim | borderEmpty | flex; }),
+			Button("Quit", [&screen] { screen.Exit(); })
+		}),
+	});
+	// clang-format on
+
+	container = CatchEvent(container, [&screen](Event e) {
+		if(e == Event::Character('q')) {
+			screen.ExitLoopClosure()();
+			return true;
+		}
+		return false;
+	});
+
 	screen.Loop(container);
 }
 
