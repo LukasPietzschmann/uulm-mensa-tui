@@ -69,24 +69,46 @@ int main() {
 	// clang-format off
 	auto container = Container::Vertical({
 		Container::Horizontal({
-			Renderer([] { return text("") | flex; }),
-			Renderer([] { return text("Mensa Plan") | bold | color(Color::Red) | borderEmpty; }),
-			Renderer([] { return text("") | flex; }),
+			Renderer([] { return text("Mensa Plan") | bold | color(Color::Red) | borderEmpty | flex; }),
 			Dropdown(&mensen, &selected_mensa)
 		}),
 		Renderer([] { return separator(); }),
-		Container::Tab(day_views, &selected_mensa),
+		Container::Tab(day_views, &selected_mensa) | yflex_grow,
 		Renderer([] { return separator(); }),
 		Container::Horizontal({
-			Renderer([] { return text("Natigate using ← ↑ → ↓ or the mouse. Press ↵ or click to select. Press q to exit.") | dim | borderEmpty | flex; }),
+			Renderer([] { return text("Natigate using ← ↑ → ↓ or the mouse. Press ↵ or click to select. Press ? for more.") | dim | borderEmpty | flex; }),
 			Button("Quit", [&screen] { screen.Exit(); })
 		}),
 	});
 	// clang-format on
 
-	container = CatchEvent(container, [&screen](Event e) {
+	bool modal_shown = false;
+	// clang-format off
+	Component modal = Container::Vertical({
+		Renderer([] { return vbox({
+			hbox({text("") | flex, text("Help"), text("") | flex}),
+			separator(),
+			vbox({
+				paragraph("▶ You can generally navigate the app using the arrow keys or the mouse (using the mouse might be easier though)"),
+				paragraph("▶ ? Toggles this popup"),
+				paragraph("▶ q closes the whole app"),
+				paragraph("▶ You can select your canteen of choice in the top right"),
+				paragraph("▶ Selecting a date on the left will show every meal of that day"),
+				paragraph("▶ Meals are split into main and secondary dishes: you can choose in the top center which category gets displayed"),
+			}),
+		});}),
+		Button("Quit", [&modal_shown] { modal_shown = false; })
+	}) | size(WIDTH, LESS_THAN, 80) | border;
+	// clang-format on
+
+	container |= Modal(modal, &modal_shown);
+
+	container = CatchEvent(container, [&screen, &modal_shown](Event e) {
 		if(e == Event::Character('q')) {
 			screen.ExitLoopClosure()();
+			return true;
+		} else if(e == Event::Character('?')) {
+			modal_shown = !modal_shown;
 			return true;
 		}
 		return false;
