@@ -1,47 +1,33 @@
-#include <ncurses.h>
-
-#include <cassert>
-#include <csignal>
-#include <ctime>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
-#include <iostream>
+#include <ftxui/component/captured_mouse.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_base.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
 #include <nlohmann/json.hpp>
-#include <regex>
 #include <sstream>
 #include <string>
 #include <string_view>
 
-#include "DateDetails.hpp"
-#include "ListElement.hpp"
-#include "MasterSlave.hpp"
-#include "constants.hpp"
-#include "utils.hpp"
+#include "Day.hpp"
+#include "DaysView.hpp"
 
 using namespace nlohmann;
+using namespace ftxui;
 
-MasterSlave<ListElement, DateDetails>* ms;
-WINDOW* footer;
+static const std::map<std::string_view, std::string_view> mensen_nice_names = {
+	{"Mensa", "Mensa Uni Süd"}, {"West", "Mensa Uni West"}};
 
-unsigned width;
-unsigned height;
-
-std::string get_url_for_date(const Date&);
 Date parse_date(const std::string& date_string);
-void handle_signal(int sig);
-void end_curses_mode();
-void setup_colors();
-void setup_windows();
-
-bool is_date_in_the_past(const Date& date);
 
 int main() {
 	curlpp::Cleanup raii_cleanup;
 	curlpp::Easy req;
 	std::stringstream result;
 	req.setOpt(cURLpp::Options::WriteStream(&result));
-	req.setOpt<curlpp::options::Url>("https://uulm.anter.dev/api/v1/canteens/ul_uni_sued/all");
+	req.setOpt<curlpp::options::Url>("https://uulm.anter.dev/api/v1/mensaplan.json");
 	try {
 		req.perform();
 	} catch(const curlpp::LibcurlRuntimeError& e) {
@@ -49,135 +35,48 @@ int main() {
 		return 1;
 	}
 
-	json api_response = json::parse(result.view());
-	const auto& uni_sued_data = api_response.value("ul_uni_sued", json::array());
+	std::map<std::string_view, std::vector<Day>> data;
+	for(const auto& [key, _] : mensen_nice_names)
+		data.try_emplace(key, std::vector<Day>());
 
-	initscr();
-
-	signal(SIGINT, handle_signal);
-	signal(SIGABRT, handle_signal);
-	signal(SIGKILL, handle_signal);
-
-	cbreak();
-	timeout(-1);
-	noecho();
-	curs_set(0);
-	getmaxyx(stdscr, height, width);
-
-	setup_colors();
-	setup_windows();
-
-	for(const auto& element : uni_sued_data.items()) {
-		const Date& date = parse_date(element.key());
-
-		if(is_date_in_the_past(date))
-			continue;
-
-		std::vector<Meal> meals;
-		meals.reserve(4);
-		for(const auto& meal : element.value().items()) {
-			const auto& meal_value = meal.value();
-			meals.emplace_back(meal_value.at("category").get<std::string>(), meal_value.at("name").get<std::string>(),
-				meal_value.at("prices").at("students").get<std::string>());
+	const json& api_response = json::parse(result.view());
+	for(const json& week : api_response.at("weeks")) {
+		for(const json& day : week.at("days")) {
+			Day parsed_day(parse_date(day.at("date").get<std::string>()));
+			for(const auto& [key, _] : mensen_nice_names) {
+				const json& mensa = day.at(key);
+				for(const json& meal : mensa.at("meals")) {
+					parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
+						meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>());
+				}
+				data.at(key).emplace_back(parsed_day);
+			}
 		}
-		ms->emplace_back(date, meals);
-	}
-	ms->select_elem(0, SelectAction::SELECT);
-	ms->prepare_refresh();
-
-	if(ms->size() == 0) {
-		end_curses_mode();
-		std::cout << "No meals available :(\n" << std::endl;
-		return 0;
 	}
 
-	doupdate();
-	while(int c = wgetch(footer)) {
-		bool had_error = false;
-		if(c == 'q')
-			break;
-		if(c == KEY_ARROW_UP || c == KEY_ARROW_DOWN || c == 'j' || c == 'k') {
-			SelectAction action = c == KEY_ARROW_UP || c == 'k' ? SelectAction::DECREMENT : SelectAction::INCREMENT;
-			had_error = !ms->select_elem(1, action) || had_error;
-			ms->prepare_refresh();
-		} else if(c == KEY_ESCAPE) {
-			ms->unselect_elem();
-			ms->prepare_refresh();
-		}
+	auto screen = ScreenInteractive::Fullscreen();
+	int selected_mensa = 0;
+	std::vector<std::string> mensen;
+	mensen.reserve(data.size());
+	for(const auto& [mensa, _] : data)
+		mensen.emplace_back(mensen_nice_names.at(mensa));
 
-		if(had_error) {
-			beep();
-			flash();
-		}
+	Components day_views;
+	day_views.reserve(data.size());
+	for(const auto& [_, days] : data)
+		day_views.push_back(Make<DaysView>(days));
 
-		doupdate();
-	}
-
-	handle_signal(0);
-}
-
-std::string get_url_for_date(const Date& date) {
-	static const std::string_view api_base = "https://uulm.anter.dev/api/v1/canteens/ul_uni_sued/days/";
-	std::stringstream ss;
-	ss << api_base << date.year << "-" << date.month << "-" << date.day << "/meals";
-	return ss.str();
+	auto container = Container::Vertical(
+		{Container::Horizontal({Renderer([] { return text("Mensa Plan") | bold | borderEmpty | flex; }),
+			 Dropdown(&mensen, &selected_mensa)}),
+			Renderer([] { return separator(); }), Container::Tab(day_views, &selected_mensa)});
+	screen.Loop(container);
 }
 
 Date parse_date(const std::string& date_string) {
-	std::smatch match;
-	bool found_match = std::regex_match(
-		date_string, match, std::regex("(\\d{4})-(\\d{2})-(\\d{2})", std::regex_constants::ECMAScript));
-	assert(found_match);
-	return {std::stoi(match[1]), std::stoi(match[2]), std::stoi(match[3])};
-}
-
-void handle_signal(int sig) {
-	end_curses_mode();
-	exit(sig);
-}
-
-void end_curses_mode() {
-	delete ms;
-	delwin(footer);
-	endwin();
-}
-
-void setup_colors() {
-	start_color();
-	init_color(COLOR_REAL_BLACK, 0, 0, 0);
-	init_pair(STD_COLOR_PAIR, COLOR_WHITE, COLOR_REAL_BLACK);
-	init_pair(FOOTER_COLOR_PAIR, COLOR_REAL_BLACK, COLOR_RED);
-	init_pair(HIGHLIGHT_EXPR_COLOR_PAR, COLOR_RED, COLOR_REAL_BLACK);
-}
-
-void setup_windows() {
-	wresize(stdscr, 0, 0);
-	wnoutrefresh(stdscr);
-
-	ms = new MasterSlave<ListElement, DateDetails>(width, height - FOOTER_HEIGHT, 0, 0);
-	ms->set_bg(STD_COLOR_PAIR);
-	ms->prepare_refresh();
-
-	footer = newwin(FOOTER_HEIGHT, width, height - FOOTER_HEIGHT, 0);
-	wbkgd(footer, COLOR_PAIR(FOOTER_COLOR_PAIR));
-	const std::string& string = pad_center_string_to_width("Arrow up/down: Select date\tq: Quit", width);
-	mvwaddnstr(footer, 0, 0, string.c_str(), string.size());
-
-	keypad(footer, true);
-	wnoutrefresh(footer);
-}
-
-bool is_date_in_the_past(const Date& date) {
-	std::tm futureDate;
-	futureDate.tm_year = date.year - 1900;
-	futureDate.tm_mon = date.month - 1;
-	// A little bit hacky, but it works
-	// This is needed to show "today"
-	futureDate.tm_mday = date.day + 1;
-
-	std::mktime(&futureDate);
-	std::time_t t = std::time(nullptr);
-	std::time_t futureTime = std::mktime(&futureDate);
-
-	return t > futureTime;
+	std::stringstream date(date_string);
+	char delimiter;
+	unsigned year, month, a;
+	date >> year >> delimiter >> month >> delimiter >> a;
+	return Date(a, month, year);
 }

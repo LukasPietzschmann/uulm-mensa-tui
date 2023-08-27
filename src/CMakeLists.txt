@@ -1,9 +1,19 @@
 include(FetchContent)
 
-set(CURSES_NEED_NCURSES TRUE)
-set(CURSES_NEED_WIDE TRUE)
-include(FindCurses)
-find_package(Curses REQUIRED)
+
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(
+	ftxui
+	GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+	GIT_TAG cdf28903a7781f97ba94d30b79c3a4b0c97ccce7
+)
+
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+	FetchContent_Populate(ftxui)
+	add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 FetchContent_Declare(
 		curlpp
 		GIT_REPOSITORY https://github.com/jpbarrette/curlpp.git
@@ -17,6 +27,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(curlpp json)
 
-add_executable(tui main.cpp DateDetails.cpp)
-target_link_libraries(tui ${CURSES_LIBRARIES} curlpp nlohmann_json::nlohmann_json)
-target_include_directories(tui PUBLIC ${CURSES_INCLUDE_DIR} ${curlpp_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
+add_executable(tui main.cpp DaysView.cpp MealView.cpp MealsView.cpp)
+target_link_libraries(tui ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
+target_include_directories(tui PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
