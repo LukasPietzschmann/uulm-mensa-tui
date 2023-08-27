@@ -1,6 +1,5 @@
 include(FetchContent)
 
-
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(
 	ftxui
@@ -27,6 +26,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(curlpp json)
 
-add_executable(tui main.cpp DaysView.cpp MealView.cpp MealsView.cpp)
-target_link_libraries(tui ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
-target_include_directories(tui PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
+add_executable(mensa main.cpp DaysView.cpp MealView.cpp MealsView.cpp)
+target_link_libraries(mensa ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
+target_include_directories(mensa PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
+
+install(TARGETS mensa DESTINATION bin)
