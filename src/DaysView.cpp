@@ -11,15 +11,22 @@ DaysView::DaysView(const std::vector<Day>& days) {
 	m_dates.reserve(numof_days);
 	m_meals_per_day.reserve(numof_days);
 	for(const Day& day : days) {
-		m_dates.push_back(std::format("{:02d}.{:02d}.{}", day.date.day, day.date.month, day.date.year));
+		if(day.date.is_in_the_past())
+			continue;
+		std::string date;
+		switch(day.date.get_relative_id()) {
+			case RelativeDate::TODAY: date = "Today"; break;
+			case RelativeDate::TOMORROW: date = "Tomorrow"; break;
+			case RelativeDate::OTHER:
+				date = std::format("{:02d}.{:02d}.{}", day.date.day, day.date.month, day.date.year);
+				break;
+		}
+		m_dates.push_back(date);
 		m_meals_per_day.push_back(Make<MealsView>(day.meals));
 	}
 
 	m_layout = ResizableSplitLeft(
-		Menu(&m_dates, &m_selected_date),
-		Container::Tab(m_meals_per_day, &m_selected_date),
-		&m_left_size
-	);
+		Menu(&m_dates, &m_selected_date), Container::Tab(m_meals_per_day, &m_selected_date), &m_left_size);
 }
 
 Element DaysView::Render() { return m_layout->Render(); }

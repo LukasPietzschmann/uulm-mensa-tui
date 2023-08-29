@@ -26,7 +26,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(curlpp json)
 
-add_executable(mensa main.cpp DaysView.cpp MealView.cpp MealsView.cpp)
+add_executable(mensa main.cpp Date.cpp DaysView.cpp MealView.cpp MealsView.cpp)
 target_link_libraries(mensa ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
 target_include_directories(mensa PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
 

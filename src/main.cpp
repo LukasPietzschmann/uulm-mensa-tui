@@ -120,7 +120,7 @@ int main() {
 Date parse_date(const std::string& date_string) {
 	std::stringstream date(date_string);
 	char delimiter;
-	unsigned year, month, a;
-	date >> year >> delimiter >> month >> delimiter >> a;
-	return Date(a, month, year);
+	unsigned year, month, day;
+	date >> year >> delimiter >> month >> delimiter >> day;
+	return Date(day, month, year);
 }
