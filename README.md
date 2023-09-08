@@ -14,6 +14,6 @@ build at least C++ 20 code.
 If you meet those those requirements, you can follow these steps:
 1. Clone the project: `git clone https://github.com/LukasPietzschmann/uulm-mensa-tui.git`
 2. Navigate inside the project: `cd uulm-mensa-tui`
-3. Create a build folger and cd into it: `mkdir build ; cd build`
+3. Create a build folder and cd into it: `mkdir build ; cd build`
 4. Setup the build environment: `cmake ..`
 5. Build it: `sudo cmake --build . --target install`
