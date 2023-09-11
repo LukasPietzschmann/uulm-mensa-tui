@@ -43,8 +43,9 @@ int main() {
 	for(const json& week : api_response.at("weeks")) {
 		for(const json& day : week.at("days")) {
 			for(const auto& [key, _] : mensen_nice_names) {
-				Day parsed_day(parse_date(day.at("date").get<std::string>()));
 				const json& mensa = day.at(key);
+				bool is_open = mensa.at("open");
+				Day parsed_day(parse_date(day.at("date").get<std::string>()), is_open);
 				for(const json& meal : mensa.at("meals")) {
 					parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
 						meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>());
