@@ -1,3 +1,4 @@
+#include <cassert>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -19,6 +20,7 @@ using namespace ftxui;
 
 static const std::map<std::string_view, std::string_view> mensen_nice_names = {
 	{"Mensa", "Mensa Uni Süd"}, {"West", "Mensa Uni West"}, {"Bistro", "Bistro Uni Nord"}};
+static const std::string_view default_mensa = mensen_nice_names.at("Mensa");
 
 Date parse_date(const std::string& date_string);
 
@@ -56,11 +58,13 @@ int main() {
 	}
 
 	auto screen = ScreenInteractive::Fullscreen();
-	int selected_mensa = 0;
 	std::vector<std::string> mensen;
 	mensen.reserve(data.size());
 	for(const auto& [mensa, _] : data)
 		mensen.emplace_back(mensen_nice_names.at(mensa));
+	const auto& it = std::find(mensen.begin(), mensen.end(), default_mensa);
+	assert(it != mensen.end());
+	int selected_mensa = std::distance(mensen.begin(), it);
 
 	Components day_views;
 	day_views.reserve(data.size());
