@@ -5,8 +5,8 @@
 #include "MealView.hpp"
 #include "MealsView.hpp"
 
-const std::set<std::string_view> MealsView::m_main_meal_categories{
-	"Topf und Pfanne", "Prima Klima", "Fleisch und Fisch", "Sattmacher"};
+const std::set<std::string_view> MealsView::m_main_meal_categories{"Topf und Pfanne", "Prima Klima",
+	"Fleisch und Fisch", "Sattmacher", "Pizza I", "Pizza II", "Pizza III", "Pasta I", "Pasta II", "Pasta III"};
 
 MealsView::MealsView(const std::vector<Meal>& meals) {
 	m_main_meals.reserve(4);

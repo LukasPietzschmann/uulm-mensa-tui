@@ -18,7 +18,7 @@ using namespace nlohmann;
 using namespace ftxui;
 
 static const std::map<std::string_view, std::string_view> mensen_nice_names = {
-	{"Mensa", "Mensa Uni Süd"}, {"West", "Mensa Uni West"}};
+	{"Mensa", "Mensa Uni Süd"}, {"West", "Mensa Uni West"}, {"Bistro", "Bistro Uni Nord"}};
 
 Date parse_date(const std::string& date_string);
 
