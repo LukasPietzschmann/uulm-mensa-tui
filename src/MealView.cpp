@@ -1,6 +1,7 @@
 #include "MealView.hpp"
 
 #include <sstream>
+#include <vector>
 
 Element MealView::Render() {
 	std::stringstream attributes;
@@ -9,6 +10,8 @@ Element MealView::Render() {
 			attributes << ", ";
 		attributes << Meal::attibute_to_string(*it);
 	}
-	return window(text(std::string(m_meal.category)),
-		vbox({text(std::string(m_meal.name)), text(std::string(m_meal.price)), text(attributes.str())}));
+	std::vector<Element> body_elements = {text(std::string(m_meal.name)), text(std::string(m_meal.price))};
+	if(!m_meal.attributes.empty())
+		body_elements.emplace_back(text(attributes.str()));
+	return window(text(std::string(m_meal.category)), vbox(body_elements));
 }
