@@ -24,10 +24,16 @@ FetchContent_Declare(
 		GIT_TAG bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d
 )
 
-FetchContent_MakeAvailable(curlpp json)
+FetchContent_Declare(
+		cxxopts
+		GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+		GIT_TAG eb787304d67ec22f7c3a184ee8b4c481d04357fd
+)
+
+FetchContent_MakeAvailable(curlpp json cxxopts)
 
 add_executable(mensa main.cpp Date.cpp DaysView.cpp MealView.cpp MealsView.cpp)
 target_link_libraries(mensa ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
-target_include_directories(mensa PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include)
+target_include_directories(mensa PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include ${cxxopts_SOURCE_DIR}/include)
 
 install(TARGETS mensa DESTINATION bin)

@@ -6,6 +6,10 @@ If you don't value unoccupied RAM and insist of using a Web-App for literally ev
 
 ![Screenshot_20230829_210130](https://github.com/LukasPietzschmann/uulm-mensa-tui/assets/49213919/8973603f-12dd-44db-8413-a3cab523ad1b)
 
+## Commandline Flags
+- `-f`/`--filter`: You can specify _meal attributes_ to filter for. If you're, for
+  example, vegan, you can specify `-f Vegan` to only get vegan food. Possible options
+  are: Vegan, Vegetarisch, Bio, Schwein, Rind.
 
 ## Build and install
 To build and install you need a working version of CMake >= 3.20 and a compiler that can

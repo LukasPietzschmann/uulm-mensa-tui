@@ -2,12 +2,15 @@
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
+#include <cxxopts.hpp>
 #include <ftxui/component/captured_mouse.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <nlohmann/json.hpp>
+#include <optional>
+#include <set>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -23,8 +26,29 @@ static const std::map<std::string_view, std::string_view> mensen_nice_names = {
 static const std::string_view default_mensa = mensen_nice_names.at("Mensa");
 
 Date parse_date(const std::string& date_string);
+std::optional<Meal::Attribute> parse_attribute(const std::string& string);
 
-int main() {
+int main(int argc, const char** argv) {
+	cxxopts::Options options(argv[0]);
+	options.add_options()("f,filter",
+		"Only show Meals with the given attributes. Posisble values are: Bio, Vegetarisch, Vegan, Schwein, Rind. "
+		"Example usage: -f Bio,Vegan",
+		cxxopts::value<std::vector<std::string>>());
+	const cxxopts::ParseResult& cmdline = options.parse(argc, argv);
+	std::set<Meal::Attribute> filter_attributes;
+	if(cmdline.count("filter")) {
+		for(const std::string& filter : cmdline["filter"].as<std::vector<std::string>>()) {
+			const auto& attribute = Meal::string_to_attribute(filter);
+			if(!attribute) {
+				std::cout << options.help();
+				return 1;
+			}
+			filter_attributes.emplace(*attribute);
+			if(*attribute == Meal::Attribute::VEGETARIAN)
+				filter_attributes.emplace(Meal::Attribute::VEGAN);
+		}
+	}
+
 	curlpp::Cleanup raii_cleanup;
 	curlpp::Easy req;
 	std::stringstream result;
@@ -49,23 +73,24 @@ int main() {
 				bool is_open = mensa.at("open");
 				Day parsed_day(parse_date(day.at("date").get<std::string>()), is_open);
 				for(const json& meal : mensa.at("meals")) {
-					std::vector<std::string> raw_attributes = meal.at("allergy");
-					std::vector<Meal::Attribute> attributes;
-					for(const std::string& raw_attribute : raw_attributes) {
-						if(raw_attribute == "veg")
-							attributes.emplace_back(Meal::Attribute::VEGETARIAN);
-						else if(raw_attribute == "van")
-							attributes.emplace_back(Meal::Attribute::VEGAN);
-						else if(raw_attribute == "bio")
-							attributes.emplace_back(Meal::Attribute::BIO);
-						else if(raw_attribute == "S")
-							attributes.emplace_back(Meal::Attribute::PORK);
-						else if(raw_attribute == "R")
-							attributes.emplace_back(Meal::Attribute::BEEF);
+					std::set<Meal::Attribute> attributes;
+					for(const auto& raw_attribute : meal.at("allergy")) {
+						const std::optional<Meal::Attribute>& attribute = parse_attribute(raw_attribute);
+						if(attribute)
+							attributes.emplace(*attribute);
 					}
-					parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
-						meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
-						attributes);
+					bool matches_filter = filter_attributes.empty();
+					for(const Meal::Attribute& filter : filter_attributes) {
+						if(attributes.contains(filter)) {
+							matches_filter = true;
+							break;
+						}
+					}
+					if(matches_filter) {
+						parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
+							meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
+							attributes);
+					}
 				}
 				data.at(key).emplace_back(parsed_day);
 			}
@@ -86,10 +111,19 @@ int main() {
 	for(const auto& [_, days] : data)
 		day_views.push_back(Make<DaysView>(days));
 
+	std::stringstream attributes;
+	if(!filter_attributes.empty())
+		attributes << "Filter: ";
+	for(auto it = filter_attributes.begin(); it != filter_attributes.end(); ++it) {
+		if(it != filter_attributes.begin())
+			attributes << ", ";
+		attributes << Meal::attibute_to_string(*it);
+	}
 	// clang-format off
 	auto container = Container::Vertical({
 		Container::Horizontal({
 			Renderer([] { return text("Mensa Plan") | bold | color(Color::Red) | borderEmpty | flex; }),
+			Renderer([&attributes] { return text(attributes.str()) | borderEmpty | flex; }),
 			Dropdown(&mensen, &selected_mensa)
 		}),
 		Renderer([] { return separator(); }),
@@ -143,4 +177,18 @@ Date parse_date(const std::string& date_string) {
 	unsigned year, month, day;
 	date >> year >> delimiter >> month >> delimiter >> day;
 	return Date(day, month, year);
+}
+
+std::optional<Meal::Attribute> parse_attribute(const std::string& string) {
+	if(string == "veg")
+		return Meal::Attribute::VEGETARIAN;
+	else if(string == "van")
+		return Meal::Attribute::VEGAN;
+	else if(string == "bio")
+		return Meal::Attribute::BIO;
+	else if(string == "S")
+		return Meal::Attribute::PORK;
+	else if(string == "R")
+		return Meal::Attribute::BEEF;
+	return {};
 }
