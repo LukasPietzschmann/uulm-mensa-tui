@@ -49,8 +49,23 @@ int main() {
 				bool is_open = mensa.at("open");
 				Day parsed_day(parse_date(day.at("date").get<std::string>()), is_open);
 				for(const json& meal : mensa.at("meals")) {
+					std::vector<std::string> raw_attributes = meal.at("allergy");
+					std::vector<Meal::Attribute> attributes;
+					for(const std::string& raw_attribute : raw_attributes) {
+						if(raw_attribute == "veg")
+							attributes.emplace_back(Meal::Attribute::VEGETARIAN);
+						else if(raw_attribute == "van")
+							attributes.emplace_back(Meal::Attribute::VEGAN);
+						else if(raw_attribute == "bio")
+							attributes.emplace_back(Meal::Attribute::BIO);
+						else if(raw_attribute == "S")
+							attributes.emplace_back(Meal::Attribute::PORK);
+						else if(raw_attribute == "R")
+							attributes.emplace_back(Meal::Attribute::BEEF);
+					}
 					parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
-						meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>());
+						meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
+						attributes);
 				}
 				data.at(key).emplace_back(parsed_day);
 			}
