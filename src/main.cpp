@@ -68,31 +68,35 @@ int main(int argc, const char** argv) {
 	const json& api_response = json::parse(result.view());
 	for(const json& week : api_response.at("weeks")) {
 		for(const json& day : week.at("days")) {
-			for(const auto& [key, _] : mensen_nice_names) {
-				const json& mensa = day.at(key);
-				bool is_open = mensa.at("open");
-				Day parsed_day(parse_date(day.at("date").get<std::string>()), is_open);
-				for(const json& meal : mensa.at("meals")) {
-					std::set<Meal::Attribute> attributes;
-					for(const auto& raw_attribute : meal.at("allergy")) {
-						const std::optional<Meal::Attribute>& attribute = parse_attribute(raw_attribute);
-						if(attribute)
-							attributes.emplace(*attribute);
-					}
-					bool matches_filter = filter_attributes.empty();
-					for(const Meal::Attribute& filter : filter_attributes) {
-						if(attributes.contains(filter)) {
-							matches_filter = true;
-							break;
+			for(const auto& [key, nice_name] : mensen_nice_names) {
+				try {
+					const json& mensa = day.at(key);
+					bool is_open = mensa.at("open");
+					Day parsed_day(parse_date(day.at("date").get<std::string>()), is_open);
+					for(const json& meal : mensa.at("meals")) {
+						std::set<Meal::Attribute> attributes;
+						for(const auto& raw_attribute : meal.at("allergy")) {
+							const std::optional<Meal::Attribute>& attribute = parse_attribute(raw_attribute);
+							if(attribute)
+								attributes.emplace(*attribute);
+						}
+						bool matches_filter = filter_attributes.empty();
+						for(const Meal::Attribute& filter : filter_attributes) {
+							if(attributes.contains(filter)) {
+								matches_filter = true;
+								break;
+							}
+						}
+						if(matches_filter) {
+							parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
+								meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
+								attributes);
 						}
 					}
-					if(matches_filter) {
-						parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
-							meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
-							attributes);
-					}
+					data.at(key).emplace_back(parsed_day);
+				} catch(const json::exception& e) {
+					// No actions needed
 				}
-				data.at(key).emplace_back(parsed_day);
 			}
 		}
 	}
