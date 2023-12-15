@@ -32,8 +32,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(curlpp json cxxopts)
 
+find_package(CURL REQUIRED)
+
 add_executable(mensa main.cpp Date.cpp DaysView.cpp MealView.cpp MealsView.cpp)
-target_link_libraries(mensa ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
-target_include_directories(mensa PUBLIC ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include ${cxxopts_SOURCE_DIR}/include)
+target_link_libraries(mensa ${CURL_LIBRARIES} ftxui::screen ftxui::dom ftxui::component curlpp nlohmann_json::nlohmann_json)
+target_include_directories(mensa PUBLIC ${CURL_INCLUDE_DIR} ${curlpp_SOURCE_DIR}/include ${ftxui_SOURCE_DIR}/include ${json_SOURCE_DIR}/include ${cxxopts_SOURCE_DIR}/include)
 
 install(TARGETS mensa DESTINATION bin)
