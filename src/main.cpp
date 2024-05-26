@@ -91,7 +91,7 @@ int main(int argc, const char** argv) {
 						if(matches_filter) {
 							parsed_day.meals.emplace_back(meal.at("meal").get<std::string_view>(),
 								meal.at("category").get<std::string_view>(), meal.at("price").get<std::string_view>(),
-								types);
+								types, meal.at("nutrition").at("calories").get<std::string_view>());
 						}
 					}
 					data.at(key).emplace_back(parsed_day);

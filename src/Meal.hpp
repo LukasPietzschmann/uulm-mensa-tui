@@ -10,14 +10,14 @@ struct Meal {
 	enum class Attribute { VEGAN, VEGETARIAN, PORK, BEEF, CHICKEN, FISH, LAMB };
 
 	Meal(std::string_view name, std::string_view category, std::string_view price,
-		const std::set<Attribute>& attributes) :
-		name(name),
-		category(category), price(price), attributes(attributes){};
+		const std::set<Attribute>& attributes, std::string_view calories) :
+		name(name), category(category), price(price), attributes(attributes), calories(calories) {};
 
 	std::string_view name;
 	std::string_view category;
 	std::string_view price;
 	std::set<Attribute> attributes;
+	std::string_view calories;
 
 	static const std::string_view attibute_to_string(Attribute attribute) {
 		switch(attribute) {
